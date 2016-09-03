@@ -1,6 +1,6 @@
 {
     "name": "seotils/properties",
-    "description": "",
+    "description": "Sets, gets and validate properties",
     "license": "GPL-3.0",
     "keywords": ["traits", "adjust properties", "getter", "setter", "validation"],
     "homepage": "https://github.com/seotils/properties",
