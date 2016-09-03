@@ -45,10 +45,15 @@ abstract class GetterSetterValidator implements IntefaceGetterSetterValidator {
    *
    * @param PropertiesClass $parenClass
    */
-  public function parentClass( PropertiesClass $parenClass) {
-    $this->overridedSetParentClass( $parenClass );
+  public function parentClass( PropertiesClass $parenClass = null ) {
+    $result = null;
+    if( $parenClass ) {
+      $result = $this->overridedSetParentClass( $parenClass );
+    } else {
+      $result = $this->overridedSetParentClass();
+    }
+    return $result;
   }
-
   /**
    * Set/Unset the strict mode
    *

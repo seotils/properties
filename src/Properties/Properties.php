@@ -83,7 +83,7 @@ class Properties {
   public function __construct( $parentClass ) {
     $this->parentClass( $parentClass );
     $this->instGetter = new Getter( $this );
-    $this->instGetter = new Setter( $this );
+    $this->instSetter = new Setter( $this );
     $this->instValidator = new Validator( $this );
   }
 
