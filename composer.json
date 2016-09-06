@@ -1,6 +1,6 @@
 {
     "name": "seotils/properties",
-    "description": "Sets, gets and validate properties",
+    "description": "Sets, gets and validate class properties",
     "license": "GPL-3.0",
     "keywords": ["traits", "adjust properties", "getter", "setter", "validation"],
     "homepage": "https://github.com/seotils/properties",
@@ -17,7 +17,7 @@
     },
     "autoload": {
         "psr-0": {
-            "Seotils": "src/"
+            "Seotils\\Properties": "src/"
         }
     }
 }

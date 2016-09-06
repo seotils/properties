@@ -9,8 +9,8 @@
 
 namespace Seotils\Properties;
 
-use Seotils\Intefaces\IntefaceGetterSetterValidator;
 use Seotils\Traits\HasParent;
+use Seotils\Properties\Intefaces\IntefaceGetterSetterValidator;
 use Seotils\Properties\Getter;
 use Seotils\Properties\Setter;
 use Seotils\Properties\Validator;
@@ -27,6 +27,102 @@ class PropertiesException extends \Exception {};
 class Properties {
 
   use HasParent;
+
+  // Types of properties
+
+  /**
+   * Regular property type
+   *
+   * @var int
+   */
+  const PROPERTY_TYPE_REGULAR  = 1;
+
+  /**
+   * Array property type
+   *
+   * @var int
+   */
+  const PROPERTY_TYPE_ARRAY    = 2;
+
+  /**
+   * Class property type
+   *
+   * @var int
+   */
+  const PROPERTY_TYPE_CALLBACK = 3;
+
+  /**
+   * Class property type
+   *
+   * @var int
+   */
+  const PROPERTY_TYPE_CLASS    = 4;
+
+  /**
+   * Resource property type
+   *
+   * @var int
+   */
+  const PROPERTY_TYPE_RESOURCE = 4;
+
+  // Types of values
+
+  /**
+   * Boolean value type
+   *
+   * @var int
+   */
+  const VALUE_TYPE_BOOLEAN  = 1;
+
+  /**
+   * Integer value type
+   *
+   * @var int
+   */
+  const VALUE_TYPE_INTEGER  = 2;
+
+  /**
+   * Double value type
+   *
+   * @var int
+   */
+  const VALUE_TYPE_DOUBLE   = 3;
+
+  /**
+   * String value type
+   *
+   * @var int
+   */
+  const VALUE_TYPE_STRING   = 4;
+
+  /**
+   * Array value type
+   *
+   * @var int
+   */
+  const VALUE_TYPE_ARRAY    = 5;
+
+  /**
+   * Resource value type
+   *
+   * @var int
+   */
+  const VALUE_TYPE_RESOURCE = 6;
+
+  /**
+   * Callback value type
+   *
+   * @var int
+   */
+  const VALUE_TYPE_CALLBACK = 7;
+
+  /**
+   * Class value type
+   *
+   * @var int
+   */
+  const VALUE_TYPE_CLASS    = 8;
+
 
   /**
    * Properties getter instance
@@ -64,6 +160,13 @@ class Properties {
   protected $propSequence;
 
   /**
+   * Use strict mode
+   *
+   * @var boolean
+   */
+  protected $strict = true;
+
+  /**
    * "Magic" method
    *
    * @param type $name
@@ -94,18 +197,77 @@ class Properties {
    * @return type
    */
   public function get( $strict = true ) {
-    return $this->instGetter->strictMode( $strict )->applySequence();
+    $result = $this->instGetter->strictMode( $strict )->applySequence();
+    $this->releaseSequence();
+    return $result;
+  }
+
+  /**
+   * Get property by name
+   *
+   * @param string $name Property name
+   * @param boolean $strict Use strict mode
+   *
+   * @return \Seotils\Properties\Properties
+   */
+  public function getProperty( $name, $strict = true ) {
+    $result = null;
+    if( isset( $this->propValues [$name] )) {
+      $result = $this->propValues [$name];
+    } else {
+      $this->exception("Property `{$name}` does not exists.");
+    }
+    return $result;
   }
 
   /**
    * Set the properties
    *
    * @param boolean $strict Use strict mode
-   * @return type
+   * @return void
    */
   public function set( $strict = true ) {
-    return $this->instSetter->strictMode( $strict )->applySequence();
+    $this->instSetter->strictMode( $strict )->applySequence();
+    $this->releaseSequence();
   }
+
+  /**
+   * Set property by name
+   *
+   * @param string $name Property name
+   * @param mixed $value Property value
+   * @param boolean $strict Use strict mode
+   *
+   * @return \Seotils\Properties\Properties
+   */
+  public function setProperty( $name, $value, $strict = true ) {
+    $this->useExceptions( $strict );
+    $this->propValues [$name] = $value;
+    return $this;
+  }
+
+  /**
+   * Set/Unset the strict mode
+   *
+   * @param boolean $strict
+   * @return \Seotils\Properties\GetterSetterValidator
+   */
+  public function strictMode( $strict = true )
+  {
+    $this->strict = (bool) $strict;
+    return $this;
+  }
+
+  /**
+   * Class in a strict mode
+   *
+   * @return boolean
+   */
+  public function isStrictMode()
+  {
+    return $this->strict;
+  }
+
 
   /**
    * Validate the properties

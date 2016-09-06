@@ -7,7 +7,7 @@
  *
  */
 
-namespace Seotils\Intefaces;
+namespace Seotils\Properties\Intefaces;
 
 /**
  * Inteface for a getter/setter/validator classes

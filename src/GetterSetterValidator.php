@@ -9,7 +9,7 @@
 
 namespace Seotils\Properties;
 
-use Seotils\Intefaces\IntefaceGetterSetterValidator;
+use Seotils\Properties\Intefaces\IntefaceGetterSetterValidator;
 use Seotils\Properties\Properties as PropertiesClass;
 use Seotils\Traits\HasParent;
 
@@ -54,13 +54,14 @@ abstract class GetterSetterValidator implements IntefaceGetterSetterValidator {
     }
     return $result;
   }
+
   /**
    * Set/Unset the strict mode
    *
    * @param boolean $strict
    * @return \Seotils\Properties\GetterSetterValidator
    */
-  public function strictMode( $strict )
+  public function strictMode( $strict = true )
   {
     $this->strict = (bool) $strict;
     return $this;
@@ -73,7 +74,7 @@ abstract class GetterSetterValidator implements IntefaceGetterSetterValidator {
    */
   public function isStrictMode()
   {
-    return $this->strictMode;
+    return $this->strict;
   }
 
   /**

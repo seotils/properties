@@ -7,7 +7,7 @@
  *
  */
 
-namespace Seotils\Traits;
+namespace Seotils\Properties\Traits;
 
 use Seotils\Properties\Properties as PropertiesClass;
 
@@ -22,6 +22,15 @@ trait Properties {
    * @var Seotils\Properties\Properties
    */
   protected $propertiesClass;
+
+  /**
+   * Define conditions and rules of the properties
+   *
+   * @return array Properties definitions
+   */
+  public function defineProperties(){
+    return [];
+  }
 
   /**
    * Returns the properties class

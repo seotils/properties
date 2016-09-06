@@ -21,10 +21,17 @@ class SetterException extends \Exception {};
  */
 class Setter extends GetterSetterValidator {
 
-  public function applySequence(){
-    $sequence = $this->parentClass()->getSequence();
+  /**
+   * Sets properties from current sequence
+   */
+  public function applySequence() {
+    $properties = $this->parentClass();
+    /* @var $properties \Seotils\Properties\Properties */
+    $sequence = $properties->getSequence();
     foreach( $sequence as $prop){
-
+      if( 1 == count( $prop ['arguments'] )){
+        $properties->setProperty( $prop ['name'], $prop ['arguments'] [0]);
+      }
     }
   }
 
