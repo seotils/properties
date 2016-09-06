@@ -10,7 +10,10 @@
 namespace Seotils\Properties;
 
 use Seotils\Traits\HasParent;
-use Seotils\Properties\Intefaces\IntefaceGetterSetterValidator;
+use Seotils\Properties\Intefaces\IGetterSetterValidator;
+use Seotils\Properties\Intefaces\IProperties;
+use Seotils\Properties\Intefaces\IProperty;
+use Seotils\Properties\Property;
 use Seotils\Properties\Getter;
 use Seotils\Properties\Setter;
 use Seotils\Properties\Validator;
@@ -24,133 +27,37 @@ class PropertiesException extends \Exception {};
  * Allows you set, get and validate properties of a parent class.
  *
  */
-class Properties {
+class Properties implements IProperties {
 
   use HasParent;
-
-  // Types of properties
-
-  /**
-   * Regular property type
-   *
-   * @var int
-   */
-  const PROPERTY_TYPE_REGULAR  = 1;
-
-  /**
-   * Array property type
-   *
-   * @var int
-   */
-  const PROPERTY_TYPE_ARRAY    = 2;
-
-  /**
-   * Class property type
-   *
-   * @var int
-   */
-  const PROPERTY_TYPE_CALLBACK = 3;
-
-  /**
-   * Class property type
-   *
-   * @var int
-   */
-  const PROPERTY_TYPE_CLASS    = 4;
-
-  /**
-   * Resource property type
-   *
-   * @var int
-   */
-  const PROPERTY_TYPE_RESOURCE = 4;
-
-  // Types of values
-
-  /**
-   * Boolean value type
-   *
-   * @var int
-   */
-  const VALUE_TYPE_BOOLEAN  = 1;
-
-  /**
-   * Integer value type
-   *
-   * @var int
-   */
-  const VALUE_TYPE_INTEGER  = 2;
-
-  /**
-   * Double value type
-   *
-   * @var int
-   */
-  const VALUE_TYPE_DOUBLE   = 3;
-
-  /**
-   * String value type
-   *
-   * @var int
-   */
-  const VALUE_TYPE_STRING   = 4;
-
-  /**
-   * Array value type
-   *
-   * @var int
-   */
-  const VALUE_TYPE_ARRAY    = 5;
-
-  /**
-   * Resource value type
-   *
-   * @var int
-   */
-  const VALUE_TYPE_RESOURCE = 6;
-
-  /**
-   * Callback value type
-   *
-   * @var int
-   */
-  const VALUE_TYPE_CALLBACK = 7;
-
-  /**
-   * Class value type
-   *
-   * @var int
-   */
-  const VALUE_TYPE_CLASS    = 8;
-
 
   /**
    * Properties getter instance
    *
-   * @var Seotils\Intefaces\IntefaceGetterSetterValidator
+   * @var Seotils\Intefaces\IGetterSetterValidator
    */
   protected $instGetter;
 
   /**
    * Properties setter instance
    *
-   * @var Seotils\Intefaces\IntefaceGetterSetterValidator
+   * @var Seotils\Intefaces\IGetterSetterValidator
    */
   protected $instSetter;
 
   /**
    * Properties validator instance
    *
-   * @var Seotils\Intefaces\IntefaceGetterSetterValidator
+   * @var Seotils\Intefaces\IGetterSetterValidator
    */
   protected $instValidator;
 
   /**
-   * Properties values
+   * Properties configuration
    *
-   * @var array
+   * @var array Array with a properties configuration
    */
-  protected $propValues;
+  protected $propConfig;
 
   /**
    * Current sequence
@@ -158,6 +65,14 @@ class Properties {
    * @var array;
    */
   protected $propSequence;
+
+  /**
+   * Properties values
+   *
+   * @var array Array of Seotils\Intefaces\IntefaceProperty classes
+   */
+  protected $propValues;
+
 
   /**
    * Use strict mode
@@ -183,15 +98,37 @@ class Properties {
    *
    * @param type $parentClass Parent class
    */
-  public function __construct( $parentClass ) {
+  public function __construct( $parentClass, $config = [] ) {
     $this->parentClass( $parentClass );
     $this->instGetter = new Getter( $this );
     $this->instSetter = new Setter( $this );
     $this->instValidator = new Validator( $this );
+    if( ! empty( $config ) && is_array( $config ))
+    {
+      $this->applyConfig( $config );
+    }
+  }
+
+  public function applyConfig( $config ) {
+    if(  ! is_array( $config )
+      || ! isset( $config ['properties'])
+      || ! is_array( $config ['properties'])
+    ) {
+      $this->exception( 'Invalid configuration.' );
+    } else {
+      $this->propConfig = $config;
+      $this->propValues = [];
+      foreach( $this->propConfig ['properties'] as $propertyName => $propertyParams ) {
+        $this->propValues [ $propertyName ] =
+            Property::factory( $propertyName, $this, $propertyParams);
+        $this->propConfig ['properties'] [$propertyName] =
+            $this->propValues [$propertyName] ->getConfig();
+      }
+    }
   }
 
   /**
-   * Returns the properties
+   * Returns a properties in the current sequence
    *
    * @param boolean $strict Use strict mode
    * @return type
@@ -208,7 +145,7 @@ class Properties {
    * @param string $name Property name
    * @param boolean $strict Use strict mode
    *
-   * @return \Seotils\Properties\Properties
+   * @return \Seotils\Intefaces\IProperty
    */
   public function getProperty( $name, $strict = true ) {
     $result = null;
@@ -221,7 +158,7 @@ class Properties {
   }
 
   /**
-   * Set the properties
+   * Sets a properties in the current sequence
    *
    * @param boolean $strict Use strict mode
    * @return void
@@ -232,17 +169,17 @@ class Properties {
   }
 
   /**
-   * Set property by name
+   * Set property object by name
    *
    * @param string $name Property name
-   * @param mixed $value Property value
+   * @param \Seotils\Intefaces\IProperty $property Property object
    * @param boolean $strict Use strict mode
    *
    * @return \Seotils\Properties\Properties
    */
-  public function setProperty( $name, $value, $strict = true ) {
+  public function setProperty( $name, $property, $strict = true ) {
     $this->useExceptions( $strict );
-    $this->propValues [$name] = $value;
+    $this->propValues [$name] = $property;
     return $this;
   }
 
@@ -282,10 +219,10 @@ class Properties {
   /**
    * Sets a custom getter
    *
-   * @param Seotils\Intefaces\IntefaceGetterSetterValidator $getter
+   * @param Seotils\Intefaces\IGetterSetterValidator $getter
    * @return void
    */
-  public function setGetter( IntefaceGetterSetterValidator $getter ) {
+  public function setGetter( IGetterSetterValidator $getter ) {
     if( $getter ){
       $this->instGetter = $getter;
       $this->instGetter->parentClass( $this );
@@ -297,10 +234,10 @@ class Properties {
   /**
    * Sets a custom setter
    *
-   * @param Seotils\Intefaces\IntefaceGetterSetterValidator $setter
+   * @param Seotils\Intefaces\IGetterSetterValidator $setter
    * @return void
    */
-  public function setSetter( IntefaceGetterSetterValidator $setter ) {
+  public function setSetter( IGetterSetterValidator $setter ) {
     if( $setter ){
       $this->instSetter = $setter;
       $this->instSetter->parentClass( $this );
@@ -312,10 +249,10 @@ class Properties {
   /**
    * Sets a custom validator
    *
-   * @param Seotils\Intefaces\IntefaceGetterSetterValidator $validator
+   * @param Seotils\Intefaces\IGetterSetterValidator $validator
    * @return void
    */
-  public function setValidator( IntefaceGetterSetterValidator $validator ) {
+  public function setValidator( IGetterSetterValidator $validator ) {
     if( $validator ){
       $this->instValidator = $validator;
       $this->instValidator->parentClass( $this );

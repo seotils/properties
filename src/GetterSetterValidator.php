@@ -9,14 +9,14 @@
 
 namespace Seotils\Properties;
 
-use Seotils\Properties\Intefaces\IntefaceGetterSetterValidator;
-use Seotils\Properties\Properties as PropertiesClass;
+use Seotils\Properties\Intefaces\IGetterSetterValidator;
+use Seotils\Properties\Intefaces\IProperties;
 use Seotils\Traits\HasParent;
 
 /**
  * Abstract base class for a getter/setter/validator classes
  */
-abstract class GetterSetterValidator implements IntefaceGetterSetterValidator {
+abstract class GetterSetterValidator implements IGetterSetterValidator {
 
   use HasParent {
     HasParent::parentClass as private overridedSetParentClass;
@@ -32,9 +32,9 @@ abstract class GetterSetterValidator implements IntefaceGetterSetterValidator {
   /**
    * Constructor
    *
-   * @param PropertiesClass $parenClass
+   * @param \Seotils\Properties\Intefaces\IProperties $parenClass
    */
-  public function __construct( PropertiesClass $parenClass = null) {
+  public function __construct( IProperties $parenClass = null) {
     if( $parenClass ){
       $this->parentClass( $parenClass );
     }
@@ -43,9 +43,9 @@ abstract class GetterSetterValidator implements IntefaceGetterSetterValidator {
   /**
    * Overrides Seotils\Traits\HasParent::parentClass() as typed
    *
-   * @param PropertiesClass $parenClass
+   * @param \Seotils\Properties\Intefaces\IProperties $parenClass
    */
-  public function parentClass( PropertiesClass $parenClass = null ) {
+  public function parentClass( IProperties $parenClass = null ) {
     $result = null;
     if( $parenClass ) {
       $result = $this->overridedSetParentClass( $parenClass );
@@ -59,7 +59,7 @@ abstract class GetterSetterValidator implements IntefaceGetterSetterValidator {
    * Set/Unset the strict mode
    *
    * @param boolean $strict
-   * @return \Seotils\Properties\GetterSetterValidator
+   * @return \Seotils\Properties\Intefaces\IGetterSetterValidator
    */
   public function strictMode( $strict = true )
   {
@@ -76,6 +76,11 @@ abstract class GetterSetterValidator implements IntefaceGetterSetterValidator {
   {
     return $this->strict;
   }
+
+  /**
+   * Process the property by name
+   */
+  abstract public function apply();
 
   /**
    * Process the current properties sequence
